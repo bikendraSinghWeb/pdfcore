@@ -35,7 +35,4 @@ var schema = new mongoose.Schema({
   
 });
 
-
-
-
 module.exports = mongoose.model('registers', schema);

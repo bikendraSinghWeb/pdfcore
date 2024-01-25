@@ -1,6 +1,6 @@
 const express = require('express');
 // const uploadPhoto = require('../midilware/image');
-const UserController = require('../Controllers/Index');
+const UserController = require('../Controllers/userController');
 const router = express.Router();
 const verify = require('../midilware/verify');
 // 10

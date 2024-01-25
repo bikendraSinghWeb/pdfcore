@@ -141,13 +141,6 @@ var schema = new mongoose.Schema({
     },
 });
 
-// schema.pre('save', async function() {
-//     if(!this.isModified("password")) {
-//         next();
-//     }
-//     const hashPassword  = bcrypt.hash(this.password,10);
-//     this.password = hashPassword;
-// })
 schema.methods.comparePassword = function (password){
     const coparePass = bcrypt.compare(password,this.password)
     return coparePass;
