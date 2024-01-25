@@ -1,4 +1,3 @@
-
 const nodemailer = require('nodemailer');
 const userModel = require('../models/createnewpdf');
 const registerModel = require('../models/register');
@@ -7,8 +6,7 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('cloudinary').v2;
-const useMessage = require('../message')
-
+const useMessage = require('../message');
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -365,14 +363,12 @@ module.exports = {
         </body>
       </html>
           `;
-
         await page.setContent(htmlContent);
 
         const pdfBuffer = await page.pdf({
           format: useMessage.FILE_FORMAT,
           printBackground: true,
         });
-
         cloudinary.uploader
           .upload_stream({ resource_type: 'raw' }, async (error, result) => {
             if (error) {
@@ -406,6 +402,7 @@ module.exports = {
         await browser.close();
       }
     } catch (error) {
+      console.log('error', error);
       res.status(500).json({ error: error.message });
     }
   },
@@ -414,6 +411,7 @@ module.exports = {
   //   const user = new userModel(req.body);
   //   const email = req.body.email;
   //   const signatureImageBase64 = req.body.signatureImage;
+
   //   // let fileName = signatureImageBase64.split(',');
   //   // const fileData = fileName[1];
   //   // fs.writeFile(
@@ -796,7 +794,7 @@ module.exports = {
   //       //   ).end(pdfBuffer);
   //       // user.pdfPath = await cloudinaryResponse.secure_url;
 
-  //       const outputFile = `./public/Pdf_File/editable_pdf_img_1${Date.now()}.pdf`;
+  //       const outputFile = `editable_pdf_img_1${Date.now()}.pdf`;
   //       const padurl = fs.writeFileSync(outputFile, pdfBuffer);
   //       user.pdfPath = outputFile;
 
@@ -829,7 +827,7 @@ module.exports = {
             success: false,
           });
         } else {
-          user.role = 'user';
+          user.role = process.env.USER; // get user
           user.referralId = referralId;
           user.password = hashPassword;
           const data = await user.save();
@@ -884,7 +882,10 @@ module.exports = {
               } else {
                 res
                   .status(401)
-                  .json({ message: useMessage.INVALID_PASSWORD, success: false });
+                  .json({
+                    message: useMessage.INVALID_PASSWORD,
+                    success: false,
+                  });
               }
             }
           );
@@ -961,10 +962,14 @@ module.exports = {
     try {
       if (email) {
         const findUser = await registerModel.findOne({ email: email });
-        const token = jwt.sign({ email: findUser.email }, process.env.PRIVATE_KEY, {
-          expiresIn: '10m',
-          algorithm: 'HS256',
-        });
+        const token = jwt.sign(
+          { email: findUser.email },
+          process.env.PRIVATE_KEY,
+          {
+            expiresIn: '10m',
+            algorithm: 'HS256',
+          }
+        );
         const userUpdate = await registerModel.updateOne(
           { email: email },
           { $set: { passwordResetToken: token } },
@@ -1050,5 +1055,13 @@ module.exports = {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
+  },
+
+  getuserinPagination: async (req, res) => {
+    let query = {};
+    const page = req.query.page;
+    const limit = req.query.limit;
+    const skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
   },
 };

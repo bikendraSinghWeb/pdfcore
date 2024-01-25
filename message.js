@@ -31,7 +31,7 @@ module.exports = {
 
     PASSWORD_CHANGE: 'your password is successfully change !!',
 
-    FILE_FORMAT: 'A4'
+    FILE_FORMAT: 'A4',
 }
 
 
